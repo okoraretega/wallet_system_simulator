@@ -37,6 +37,7 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("/", UserHandler.GetAllUsers)
+	mux.HandleFunc("/create", UserHandler.CreateUser)
 
 	err := http.ListenAndServe(":8888", mux)
 	if err != nil {
