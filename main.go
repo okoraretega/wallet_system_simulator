@@ -12,8 +12,27 @@ import (
 
 func main() {
 
-	userStore := repository.NewUserStore()
-	userService := services.NewUserService(userStore)
+	useDatabase := true
+
+	var userRepo repository.UserRepository
+
+	if useDatabase {
+		connString := "postgres://postgres:postgres@localhost:5432/learning_db?sslmode=disable"
+
+		dbStore, err := repository.NewPostgresUserStore(connString)
+		if err != nil {
+			log.Fatal("Unable to connect to database", err)
+		}
+
+		defer dbStore.Close()
+
+		userRepo = dbStore
+		fmt.Println("Using PostgrsSQL store")
+	} else {
+		userRepo = repository.NewUserStore()
+		fmt.Println("Using in-memory store")
+	}
+	userService := services.NewUserService(userRepo)
 	UserHandler := handlers.NewUserHandler(userService)
 
 	mux := http.NewServeMux()
