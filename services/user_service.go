@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"errors"
 
 	"github.com/google/uuid"
@@ -19,7 +20,7 @@ func NewUserService(s repository.UserRepository) *UserService {
 }
 
 func (s *UserService) CreateUser(u model.User) (model.User, error) {
-	users, err := s.userStore.GetAllUsers()
+	users, err := s.userStore.GetAllUsers(context.Background())
 	if err != nil {
 		return model.User{}, errors.New("An error occured while reading all users")
 	}
@@ -45,6 +46,6 @@ func (s *UserService) DeleteUser(id uuid.UUID) (bool, error) {
 	return s.userStore.DeleteUser(id)
 }
 
-func (s *UserService) GetAllUsers() ([]model.User, error) {
-	return s.userStore.GetAllUsers()
+func (s *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
+	return s.userStore.GetAllUsers(ctx)
 }

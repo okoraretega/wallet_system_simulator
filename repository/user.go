@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"slices"
 	"sync"
 
@@ -17,7 +18,7 @@ type UserRepository interface {
 	CreateUser(u model.User) (model.User, error)
 	DeleteUser(id uuid.UUID) (bool, error)
 	GetUserById(id uuid.UUID) (model.User, bool)
-	GetAllUsers() ([]model.User, error)
+	GetAllUsers(ctx context.Context) ([]model.User, error)
 }
 
 func NewUserStore() *UserStore {
@@ -34,7 +35,7 @@ func (s *UserStore) CreateUser(u model.User) (model.User, error) {
 	return u, nil
 }
 
-func (s *UserStore) GetAllUsers() ([]model.User, error) {
+func (s *UserStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

@@ -40,7 +40,8 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	users, err := h.userService.GetAllUsers()
+	ctx := r.Context()
+	users, err := h.userService.GetAllUsers(ctx)
 	if err != nil {
 		http.Error(w, "Unable to get users", http.StatusNotFound)
 	}

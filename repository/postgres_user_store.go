@@ -57,9 +57,7 @@ func (s *PostgresUserStore) CreateUser(u model.User) (model.User, error) {
 	return u, nil
 }
 
-func (s *PostgresUserStore) GetAllUsers() ([]model.User, error) {
-
-	ctx := context.Background()
+func (s *PostgresUserStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
 
 	query := `SELECT id, first_name, last_name, email FROM users`
 
