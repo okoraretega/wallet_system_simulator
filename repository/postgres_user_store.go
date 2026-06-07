@@ -41,7 +41,7 @@ func (s *PostgresUserStore) Close() {
 	s.db.Close()
 }
 
-func (s *PostgresUserStore) CreateUser(u model.User) model.User {
+func (s *PostgresUserStore) CreateUser(u model.User) (model.User, error) {
 
 	ctx := context.Background()
 
@@ -51,10 +51,10 @@ func (s *PostgresUserStore) CreateUser(u model.User) model.User {
 	`
 	err := s.db.QueryRow(ctx, query, u.FirstName, u.LastName, u.Email).Scan(&u.ID)
 	if err != nil {
-		fmt.Printf("Failed to query db: %v\n", err)
+		return model.User{}, err
 	}
 
-	return u
+	return u, nil
 }
 
 func (s *PostgresUserStore) GetAllUsers() []model.User {

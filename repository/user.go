@@ -14,7 +14,7 @@ type UserStore struct {
 }
 
 type UserRepository interface {
-	CreateUser(u model.User) model.User
+	CreateUser(u model.User) (model.User, error)
 	DeleteUser(id uuid.UUID) bool
 	GetUserById(id uuid.UUID) (model.User, bool)
 	GetAllUsers() []model.User
@@ -26,12 +26,12 @@ func NewUserStore() *UserStore {
 	}
 }
 
-func (s *UserStore) CreateUser(u model.User) model.User {
+func (s *UserStore) CreateUser(u model.User) (model.User, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	s.users = append(s.users, u)
-	return u
+	return u, nil
 }
 
 func (s *UserStore) GetAllUsers() []model.User {
