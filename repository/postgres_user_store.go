@@ -57,7 +57,7 @@ func (s *PostgresUserStore) CreateUser(u model.User) (model.User, error) {
 	return u, nil
 }
 
-func (s *PostgresUserStore) GetAllUsers() []model.User {
+func (s *PostgresUserStore) GetAllUsers() ([]model.User, error) {
 
 	ctx := context.Background()
 
@@ -75,14 +75,13 @@ func (s *PostgresUserStore) GetAllUsers() []model.User {
 		var u model.User
 		err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email)
 		if err != nil {
-			fmt.Printf("Unable to scan rows")
-			continue
+			return []model.User{}, err
 		}
 
 		users = append(users, u)
 	}
 
-	return users
+	return users, nil
 }
 
 func (s *PostgresUserStore) GetUserById(id uuid.UUID) (model.User, bool) {

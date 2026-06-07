@@ -19,7 +19,10 @@ func NewUserService(s repository.UserRepository) *UserService {
 }
 
 func (s *UserService) CreateUser(u model.User) (model.User, error) {
-	users := s.userStore.GetAllUsers()
+	users, err := s.userStore.GetAllUsers()
+	if err != nil {
+		return model.User{}, errors.New("An error occured while reading all users")
+	}
 	for _, user := range users {
 		if u.Email == user.Email {
 			return model.User{}, errors.New("User with email already exists")
@@ -42,6 +45,6 @@ func (s *UserService) DeleteUser(id uuid.UUID) (bool, error) {
 	return s.userStore.DeleteUser(id)
 }
 
-func (s *UserService) GetAllUsers() []model.User {
+func (s *UserService) GetAllUsers() ([]model.User, error) {
 	return s.userStore.GetAllUsers()
 }

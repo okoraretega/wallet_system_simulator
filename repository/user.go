@@ -17,7 +17,7 @@ type UserRepository interface {
 	CreateUser(u model.User) (model.User, error)
 	DeleteUser(id uuid.UUID) (bool, error)
 	GetUserById(id uuid.UUID) (model.User, bool)
-	GetAllUsers() []model.User
+	GetAllUsers() ([]model.User, error)
 }
 
 func NewUserStore() *UserStore {
@@ -34,13 +34,13 @@ func (s *UserStore) CreateUser(u model.User) (model.User, error) {
 	return u, nil
 }
 
-func (s *UserStore) GetAllUsers() []model.User {
+func (s *UserStore) GetAllUsers() ([]model.User, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	cpyUsers := make([]model.User, len(s.users))
 	copy(cpyUsers, s.users)
-	return cpyUsers
+	return cpyUsers, nil
 }
 
 func (s *UserStore) DeleteUser(id uuid.UUID) (bool, error) {

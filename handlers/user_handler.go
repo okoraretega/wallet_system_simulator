@@ -40,7 +40,10 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
-	users := h.userService.GetAllUsers()
+	users, err := h.userService.GetAllUsers()
+	if err != nil {
+		http.Error(w, "Unable to get users", http.StatusNotFound)
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusFound)
