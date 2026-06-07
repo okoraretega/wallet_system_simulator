@@ -36,8 +36,9 @@ func main() {
 	UserHandler := handlers.NewUserHandler(userService)
 
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", UserHandler.GetAllUsers)
+	mux.HandleFunc("/users/", UserHandler.HandleUsers)
 	mux.HandleFunc("/create", UserHandler.CreateUser)
+	mux.HandleFunc("/users", UserHandler.GetAllUsers)
 
 	err := http.ListenAndServe(":8888", mux)
 	if err != nil {

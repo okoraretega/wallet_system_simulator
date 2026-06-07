@@ -50,9 +50,15 @@ func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 func (h *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 	reqUrl := strings.TrimPrefix(r.URL.Path, "/users/")
 
+	if reqUrl == "" {
+		http.Error(w, "Please provide an ID", http.StatusBadRequest)
+		return
+	}
+
 	url, err := uuid.Parse(reqUrl)
 	if err != nil {
 		http.Error(w, "Provide a valid ID", http.StatusBadRequest)
+		return
 	}
 
 	user, bool := h.userService.GetUserById(url)
@@ -88,4 +94,15 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
+}
+
+func (h *UserHandler) HandleUsers(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		h.GetUserById(w, r)
+	case http.MethodDelete:
+		h.DeleteUser(w, r)
+	default:
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+	}
 }
