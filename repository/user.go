@@ -15,9 +15,9 @@ type UserStore struct {
 }
 
 type UserRepository interface {
-	CreateUser(u model.User) (model.User, error)
-	DeleteUser(id uuid.UUID) (bool, error)
-	GetUserById(id uuid.UUID) (model.User, bool)
+	CreateUser(ctx context.Context, u model.User) (model.User, error)
+	DeleteUser(ctx context.Context, id uuid.UUID) (bool, error)
+	GetUserById(ctx context.Context, id uuid.UUID) (model.User, bool)
 	GetAllUsers(ctx context.Context) ([]model.User, error)
 }
 
@@ -27,7 +27,7 @@ func NewUserStore() *UserStore {
 	}
 }
 
-func (s *UserStore) CreateUser(u model.User) (model.User, error) {
+func (s *UserStore) CreateUser(ctx context.Context, u model.User) (model.User, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -44,7 +44,7 @@ func (s *UserStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	return cpyUsers, nil
 }
 
-func (s *UserStore) DeleteUser(id uuid.UUID) (bool, error) {
+func (s *UserStore) DeleteUser(ctx context.Context, id uuid.UUID) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
@@ -58,7 +58,7 @@ func (s *UserStore) DeleteUser(id uuid.UUID) (bool, error) {
 	return false, nil
 }
 
-func (s *UserStore) GetUserById(id uuid.UUID) (model.User, bool) {
+func (s *UserStore) GetUserById(ctx context.Context, id uuid.UUID) (model.User, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 

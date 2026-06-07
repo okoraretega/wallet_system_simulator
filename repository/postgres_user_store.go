@@ -41,9 +41,7 @@ func (s *PostgresUserStore) Close() {
 	s.db.Close()
 }
 
-func (s *PostgresUserStore) CreateUser(u model.User) (model.User, error) {
-
-	ctx := context.Background()
+func (s *PostgresUserStore) CreateUser(ctx context.Context, u model.User) (model.User, error) {
 
 	query := `INSERT INTO users (first_name, last_name, email)
 				VALUES($1, $2, $3)
@@ -82,9 +80,7 @@ func (s *PostgresUserStore) GetAllUsers(ctx context.Context) ([]model.User, erro
 	return users, nil
 }
 
-func (s *PostgresUserStore) GetUserById(id uuid.UUID) (model.User, bool) {
-
-	ctx := context.Background()
+func (s *PostgresUserStore) GetUserById(ctx context.Context, id uuid.UUID) (model.User, bool) {
 	query := `SELECT id, first_name, last_name, email FROM users WHERE id = $1`
 
 	var u model.User
@@ -96,8 +92,7 @@ func (s *PostgresUserStore) GetUserById(id uuid.UUID) (model.User, bool) {
 	return u, true
 }
 
-func (s *PostgresUserStore) DeleteUser(id uuid.UUID) (bool, error) {
-	ctx := context.Background()
+func (s *PostgresUserStore) DeleteUser(ctx context.Context, id uuid.UUID) (bool, error) {
 	query := `DELETE FROM users WHERE id = $1`
 
 	result, err := s.db.Exec(ctx, query, id)

@@ -21,6 +21,7 @@ func NewUserHandler(s *services.UserService) *UserHandler {
 }
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	var u model.User
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
@@ -28,7 +29,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	u, err = h.userService.CreateUser(u)
+	u, err = h.userService.CreateUser(ctx, u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
@@ -52,6 +53,7 @@ func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	reqUrl := strings.TrimPrefix(r.URL.Path, "/users/")
 
 	if reqUrl == "" {
@@ -65,7 +67,7 @@ func (h *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, bool := h.userService.GetUserById(url)
+	user, bool := h.userService.GetUserById(ctx, url)
 	if bool == false {
 
 		http.Error(w, "User not found", http.StatusNotFound)
@@ -78,6 +80,7 @@ func (h *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
+	ctx := r.Context()
 	reqUrl := strings.TrimPrefix(r.URL.Path, "/users/")
 
 	url, err := uuid.Parse(reqUrl)
@@ -85,7 +88,7 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Please provide a valid ID", http.StatusBadRequest)
 	}
 
-	bool, err := h.userService.DeleteUser(url)
+	bool, err := h.userService.DeleteUser(ctx, url)
 	if err != nil {
 		http.Error(w, "Unknown Error occured", http.StatusInternalServerError)
 	}

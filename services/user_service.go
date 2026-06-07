@@ -19,7 +19,7 @@ func NewUserService(s repository.UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) CreateUser(u model.User) (model.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, u model.User) (model.User, error) {
 	users, err := s.userStore.GetAllUsers(context.Background())
 	if err != nil {
 		return model.User{}, errors.New("An error occured while reading all users")
@@ -30,7 +30,7 @@ func (s *UserService) CreateUser(u model.User) (model.User, error) {
 		}
 	}
 
-	newUser, err := s.userStore.CreateUser(u)
+	newUser, err := s.userStore.CreateUser(ctx, u)
 	if err != nil {
 		return model.User{}, err
 	}
@@ -38,12 +38,12 @@ func (s *UserService) CreateUser(u model.User) (model.User, error) {
 
 }
 
-func (s *UserService) GetUserById(id uuid.UUID) (model.User, bool) {
-	return s.userStore.GetUserById(id)
+func (s *UserService) GetUserById(ctx context.Context, id uuid.UUID) (model.User, bool) {
+	return s.userStore.GetUserById(ctx, id)
 }
 
-func (s *UserService) DeleteUser(id uuid.UUID) (bool, error) {
-	return s.userStore.DeleteUser(id)
+func (s *UserService) DeleteUser(ctx context.Context, id uuid.UUID) (bool, error) {
+	return s.userStore.DeleteUser(ctx, id)
 }
 
 func (s *UserService) GetAllUsers(ctx context.Context) ([]model.User, error) {
