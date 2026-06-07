@@ -18,16 +18,19 @@ func NewUserService(s repository.UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) CreateUser(u model.User) (error, model.User) {
+func (s *UserService) CreateUser(u model.User) (model.User, error) {
 	users := s.userStore.GetAllUsers()
 	for _, user := range users {
 		if u.Email == user.Email {
-			return errors.New("User with email already exists"), model.User{}
+			return model.User{}, errors.New("User with email already exists")
 		}
 	}
 
-	s.userStore.CreateUser(u)
-	return nil, u
+	newUser, err := s.userStore.CreateUser(u)
+	if err != nil {
+		return model.User{}, err
+	}
+	return newUser, nil
 
 }
 
@@ -35,7 +38,7 @@ func (s *UserService) GetUserById(id uuid.UUID) (model.User, bool) {
 	return s.userStore.GetUserById(id)
 }
 
-func (s *UserService) DeleteUser(id uuid.UUID) bool {
+func (s *UserService) DeleteUser(id uuid.UUID) (bool, error) {
 	return s.userStore.DeleteUser(id)
 }
 

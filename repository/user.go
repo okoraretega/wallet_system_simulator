@@ -15,7 +15,7 @@ type UserStore struct {
 
 type UserRepository interface {
 	CreateUser(u model.User) (model.User, error)
-	DeleteUser(id uuid.UUID) bool
+	DeleteUser(id uuid.UUID) (bool, error)
 	GetUserById(id uuid.UUID) (model.User, bool)
 	GetAllUsers() []model.User
 }
@@ -43,18 +43,18 @@ func (s *UserStore) GetAllUsers() []model.User {
 	return cpyUsers
 }
 
-func (s *UserStore) DeleteUser(id uuid.UUID) bool {
+func (s *UserStore) DeleteUser(id uuid.UUID) (bool, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	for i, user := range s.users {
 		if id == user.ID {
 			s.users = slices.Delete(s.users, i, i+1)
-			return true
+			return true, nil
 		}
 	}
 
-	return false
+	return false, nil
 }
 
 func (s *UserStore) GetUserById(id uuid.UUID) (model.User, bool) {

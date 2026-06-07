@@ -99,15 +99,14 @@ func (s *PostgresUserStore) GetUserById(id uuid.UUID) (model.User, bool) {
 	return u, true
 }
 
-func (s *PostgresUserStore) DeleteUser(id uuid.UUID) bool {
+func (s *PostgresUserStore) DeleteUser(id uuid.UUID) (bool, error) {
 	ctx := context.Background()
 	query := `DELETE FROM users WHERE id = $1`
 
 	result, err := s.db.Exec(ctx, query, id)
 	if err != nil {
-		fmt.Printf("Unable to delete user: %v", err)
-		return false
+		return false, err
 	}
 
-	return result.RowsAffected() > 0
+	return result.RowsAffected() > 0, nil
 }

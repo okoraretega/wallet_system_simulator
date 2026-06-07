@@ -28,7 +28,7 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err, u = h.userService.CreateUser(u)
+	u, err = h.userService.CreateUser(u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
@@ -75,7 +75,10 @@ func (h *UserHandler) DeleteUser(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Please provide a valid ID", http.StatusBadRequest)
 	}
 
-	bool := h.userService.DeleteUser(url)
+	bool, err := h.userService.DeleteUser(url)
+	if err != nil {
+		http.Error(w, "Unknown Error occured", http.StatusInternalServerError)
+	}
 
 	if bool == false {
 		http.Error(w, "User not found", http.StatusNotFound)
