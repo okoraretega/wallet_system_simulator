@@ -20,7 +20,7 @@ func NewUserService(s repository.UserRepository) *UserService {
 }
 
 func (s *UserService) CreateUser(ctx context.Context, u model.User) (model.User, error) {
-	users, err := s.userStore.GetAllUsers(context.Background())
+	users, err := s.userStore.GetAllUsers(ctx)
 	if err != nil {
 		return model.User{}, errors.New("An error occured while reading all users")
 	}
