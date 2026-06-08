@@ -15,11 +15,12 @@ func main() {
 	useDatabase := true
 
 	var userRepo repository.UserRepository
+	var walletStore repository.WalletRepository
 
 	if useDatabase {
-		connString := "postgres://postgres:postgres@localhost:5432/learning_db?sslmode=disable"
+		connString := "postgres://postgres:postgres@localhost:5432/bank_db?sslmode=disable"
 
-		dbStore, err := repository.NewPostgresUserStore(connString)
+		dbStore, err := repository.NewPostgresStore(connString)
 		if err != nil {
 			log.Fatal("Unable to connect to database", err)
 		}
@@ -27,15 +28,25 @@ func main() {
 		defer dbStore.Close()
 
 		userRepo = dbStore
+		walletStore = dbStore
 		fmt.Println("Using PostgrsSQL store")
 	} else {
 		userRepo = repository.NewUserStore()
 		fmt.Println("Using in-memory store")
 	}
+
+	mux := http.NewServeMux()
+
+	// Wallets
+	walletService := services.NewWalletService(walletStore)
+	walletHandler := handlers.NewWalletHandler(walletService)
+
+	mux.HandleFunc("/wallets", walletHandler.GetAllWalets)
+
+	// Users
 	userService := services.NewUserService(userRepo)
 	UserHandler := handlers.NewUserHandler(userService)
 
-	mux := http.NewServeMux()
 	mux.HandleFunc("/users/", UserHandler.HandleUsers)
 	mux.HandleFunc("/create", UserHandler.CreateUser)
 	mux.HandleFunc("/users", UserHandler.GetAllUsers)

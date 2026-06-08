@@ -14,13 +14,6 @@ type UserStore struct {
 	mu    sync.Mutex
 }
 
-type UserRepository interface {
-	CreateUser(ctx context.Context, u model.User) (model.User, error)
-	DeleteUser(ctx context.Context, id uuid.UUID) (bool, error)
-	GetUserById(ctx context.Context, id uuid.UUID) (model.User, bool)
-	GetAllUsers(ctx context.Context) ([]model.User, error)
-}
-
 func NewUserStore() *UserStore {
 	return &UserStore{
 		users: []model.User{},
