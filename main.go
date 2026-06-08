@@ -42,6 +42,7 @@ func main() {
 	walletHandler := handlers.NewWalletHandler(walletService)
 
 	mux.HandleFunc("/wallets", walletHandler.GetAllWalets)
+	mux.HandleFunc("/wallets/", walletHandler.GetWalletByUserId)
 
 	// Users
 	userService := services.NewUserService(userRepo)

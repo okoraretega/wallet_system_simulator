@@ -23,13 +23,14 @@ func NewUserHandler(s *services.UserService) *UserHandler {
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	var u model.User
+	var wallet model.Wallet
 	err := json.NewDecoder(r.Body).Decode(&u)
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
-	u, err = h.userService.CreateUser(ctx, u)
+	u, wallet, err = h.userService.CreateUser(ctx, u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
@@ -37,7 +38,10 @@ func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(u)
+	json.NewEncoder(w).Encode(map[string]any{
+		"user":   u,
+		"wallet": wallet,
+	})
 }
 
 func (h *UserHandler) GetAllUsers(w http.ResponseWriter, r *http.Request) {

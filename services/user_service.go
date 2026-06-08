@@ -19,22 +19,22 @@ func NewUserService(s repository.UserRepository) *UserService {
 	}
 }
 
-func (s *UserService) CreateUser(ctx context.Context, u model.User) (model.User, error) {
+func (s *UserService) CreateUser(ctx context.Context, u model.User) (model.User, model.Wallet, error) {
 	users, err := s.userStore.GetAllUsers(ctx)
 	if err != nil {
-		return model.User{}, errors.New("An error occured while reading all users")
+		return model.User{}, model.Wallet{}, errors.New("An error occured while reading all users")
 	}
 	for _, user := range users {
 		if u.Email == user.Email {
-			return model.User{}, errors.New("User with email already exists")
+			return model.User{}, model.Wallet{}, errors.New("User with email already exists")
 		}
 	}
 
-	newUser, err := s.userStore.CreateUser(ctx, u)
+	newUser, wallet, err := s.userStore.CreateUser(ctx, u)
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, model.Wallet{}, err
 	}
-	return newUser, nil
+	return newUser, wallet, nil
 
 }
 

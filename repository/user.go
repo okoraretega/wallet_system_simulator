@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"slices"
 	"sync"
 
@@ -20,12 +21,12 @@ func NewUserStore() *UserStore {
 	}
 }
 
-func (s *UserStore) CreateUser(ctx context.Context, u model.User) (model.User, error) {
+func (s *UserStore) CreateUser(ctx context.Context, u model.User) (model.User, model.Wallet, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	s.users = append(s.users, u)
-	return u, nil
+	return u, model.Wallet{}, nil
 }
 
 func (s *UserStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
@@ -51,15 +52,15 @@ func (s *UserStore) DeleteUser(ctx context.Context, id uuid.UUID) (bool, error) 
 	return false, nil
 }
 
-func (s *UserStore) GetUserById(ctx context.Context, id uuid.UUID) (model.User, bool) {
+func (s *UserStore) GetUserById(ctx context.Context, id uuid.UUID) (model.User, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
 	for _, user := range s.users {
 		if id == user.ID {
-			return user, true
+			return user, nil
 		}
 	}
 
-	return model.User{}, false
+	return model.User{}, errors.New("Unable to get user")
 }

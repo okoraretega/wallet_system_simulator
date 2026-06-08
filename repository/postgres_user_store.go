@@ -9,11 +9,11 @@ import (
 	"github.com/okoraretega/doc_stream_server/model"
 )
 
-func (s *PostgresStore) CreateUser(ctx context.Context, u model.User) (model.User, error) {
+func (s *PostgresStore) CreateUser(ctx context.Context, u model.User) (model.User, model.Wallet, error) {
 
 	tx, err := s.db.Begin(ctx)
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, model.Wallet{}, err
 	}
 
 	defer tx.Rollback(ctx)
@@ -25,25 +25,27 @@ func (s *PostgresStore) CreateUser(ctx context.Context, u model.User) (model.Use
 
 	err = tx.QueryRow(ctx, userQuery, u.FirstName, u.LastName, u.Email).Scan(&u.ID, &u.CreatedAt)
 	if err != nil {
-		return model.User{}, err
+		return model.User{}, model.Wallet{}, err
 	}
 
 	walletNumber := helpers.GenerateWalletNumber()
+	var w model.Wallet
 
 	walletQuery := `INSERT INTO wallets (user_id, wallet_number)
 					VALUES($1, $2)
+					RETURNING id, wallet_number, user_id
 	`
 
-	_, err = tx.Exec(ctx, walletQuery, u.ID, walletNumber)
+	err = tx.QueryRow(ctx, walletQuery, u.ID, walletNumber).Scan(&w.Id, &w.WalletNumber, &w.UserId)
 	if err != nil {
-		return model.User{}, fmt.Errorf("Falied to create wallet for user: %w", err)
+		return model.User{}, model.Wallet{}, fmt.Errorf("Falied to create wallet for user: %w", err)
 	}
 
 	err = tx.Commit(ctx)
 	if err != nil {
-		return model.User{}, fmt.Errorf("Failed to compelete user creation: %w", err)
+		return model.User{}, model.Wallet{}, fmt.Errorf("Failed to compelete user creation: %w", err)
 	}
-	return u, nil
+	return u, w, nil
 }
 
 func (s *PostgresStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
