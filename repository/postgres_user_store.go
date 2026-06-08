@@ -5,26 +5,50 @@ import (
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/okoraretega/doc_stream_server/helpers"
 	"github.com/okoraretega/doc_stream_server/model"
 )
 
 func (s *PostgresStore) CreateUser(ctx context.Context, u model.User) (model.User, error) {
 
-	query := `INSERT INTO users (first_name, last_name, email)
-				VALUES($1, $2, $3)
-				RETURNING id
-	`
-	err := s.db.QueryRow(ctx, query, u.FirstName, u.LastName, u.Email).Scan(&u.ID)
+	tx, err := s.db.Begin(ctx)
 	if err != nil {
 		return model.User{}, err
 	}
 
+	defer tx.Rollback(ctx)
+
+	userQuery := `INSERT INTO users (first_name, last_name, email)
+				VALUES($1, $2, $3)
+				RETURNING id, created_at
+	`
+
+	err = tx.QueryRow(ctx, userQuery, u.FirstName, u.LastName, u.Email).Scan(&u.ID, &u.CreatedAt)
+	if err != nil {
+		return model.User{}, err
+	}
+
+	walletNumber := helpers.GenerateWalletNumber()
+
+	walletQuery := `INSERT INTO wallets (user_id, wallet_number)
+					VALUES($1, $2)
+	`
+
+	_, err = tx.Exec(ctx, walletQuery, u.ID, walletNumber)
+	if err != nil {
+		return model.User{}, fmt.Errorf("Falied to create wallet for user: %w", err)
+	}
+
+	err = tx.Commit(ctx)
+	if err != nil {
+		return model.User{}, fmt.Errorf("Failed to compelete user creation: %w", err)
+	}
 	return u, nil
 }
 
 func (s *PostgresStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
 
-	query := `SELECT id, first_name, last_name, email FROM users`
+	query := `SELECT id, first_name, last_name, email, created_at FROM users`
 
 	rows, err := s.db.Query(ctx, query)
 	if err != nil {
@@ -36,7 +60,7 @@ func (s *PostgresStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	var users []model.User
 	for rows.Next() {
 		var u model.User
-		err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email)
+		err := rows.Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.CreatedAt)
 		if err != nil {
 			return []model.User{}, err
 		}
@@ -48,10 +72,10 @@ func (s *PostgresStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
 }
 
 func (s *PostgresStore) GetUserById(ctx context.Context, id uuid.UUID) (model.User, bool) {
-	query := `SELECT id, first_name, last_name, email FROM users WHERE id = $1`
+	query := `SELECT id, first_name, last_name, email, created_at FROM users WHERE id = $1`
 
 	var u model.User
-	err := s.db.QueryRow(ctx, query, id).Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email)
+	err := s.db.QueryRow(ctx, query, id).Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.CreatedAt)
 	if err != nil {
 		fmt.Printf("Unable to get user from db")
 		return model.User{}, false
