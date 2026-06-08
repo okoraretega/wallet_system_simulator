@@ -52,7 +52,7 @@ func (s *PostgresStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
 
 	rows, err := s.db.Query(ctx, query)
 	if err != nil {
-		fmt.Printf("Unable to query rows")
+		return []model.User{}, fmt.Errorf("Unable to query rows: %w", err)
 	}
 
 	defer rows.Close()
@@ -71,16 +71,15 @@ func (s *PostgresStore) GetAllUsers(ctx context.Context) ([]model.User, error) {
 	return users, nil
 }
 
-func (s *PostgresStore) GetUserById(ctx context.Context, id uuid.UUID) (model.User, bool) {
+func (s *PostgresStore) GetUserById(ctx context.Context, id uuid.UUID) (model.User, error) {
 	query := `SELECT id, first_name, last_name, email, created_at FROM users WHERE id = $1`
 
 	var u model.User
 	err := s.db.QueryRow(ctx, query, id).Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.CreatedAt)
 	if err != nil {
-		fmt.Printf("Unable to get user from db")
-		return model.User{}, false
+		return model.User{}, fmt.Errorf("User not found: %w", err)
 	}
-	return u, true
+	return u, err
 }
 
 func (s *PostgresStore) DeleteUser(ctx context.Context, id uuid.UUID) (bool, error) {

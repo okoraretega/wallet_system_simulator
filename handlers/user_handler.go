@@ -67,10 +67,10 @@ func (h *UserHandler) GetUserById(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, bool := h.userService.GetUserById(ctx, url)
-	if bool == false {
+	user, err := h.userService.GetUserById(ctx, url)
+	if err != nil {
 
-		http.Error(w, "User not found", http.StatusNotFound)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 

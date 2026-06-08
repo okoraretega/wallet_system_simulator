@@ -38,7 +38,7 @@ func (s *UserService) CreateUser(ctx context.Context, u model.User) (model.User,
 
 }
 
-func (s *UserService) GetUserById(ctx context.Context, id uuid.UUID) (model.User, bool) {
+func (s *UserService) GetUserById(ctx context.Context, id uuid.UUID) (model.User, error) {
 	return s.userStore.GetUserById(ctx, id)
 }
 
