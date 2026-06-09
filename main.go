@@ -43,6 +43,7 @@ func main() {
 
 	mux.HandleFunc("/wallets", walletHandler.GetAllWalets)
 	mux.HandleFunc("/wallets/", walletHandler.GetWalletByUserId)
+	mux.HandleFunc("/wallets/transfer", walletHandler.Transfer)
 
 	// Users
 	userService := services.NewUserService(userRepo)
@@ -52,10 +53,10 @@ func main() {
 	mux.HandleFunc("/create", UserHandler.CreateUser)
 	mux.HandleFunc("/users", UserHandler.GetAllUsers)
 
+	fmt.Println("Server starting on port 8888")
+
 	err := http.ListenAndServe(":8888", mux)
 	if err != nil {
 		log.Fatalf("Unable to start the server")
 	}
-
-	fmt.Println("Server started on port 8888")
 }

@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/google/uuid"
+	"github.com/okoraretega/doc_stream_server/model"
 	"github.com/okoraretega/doc_stream_server/services"
 )
 
@@ -33,6 +34,10 @@ func (wh *WalletHandler) GetAllWalets(w http.ResponseWriter, r *http.Request) {
 }
 
 func (wh *WalletHandler) GetWalletByUserId(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
+		return
+	}
 	ctx := r.Context()
 	url := strings.TrimPrefix(r.URL.Path, "/wallets/")
 	id, err := uuid.Parse(url)
@@ -48,9 +53,36 @@ func (wh *WalletHandler) GetWalletByUserId(w http.ResponseWriter, r *http.Reques
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusFound)
+	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]any{
 		"user":   user,
 		"wallet": wallet,
 	})
+}
+
+func (wh *WalletHandler) Transfer(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	ctx := r.Context()
+
+	var wT model.WalletTransfer
+
+	err := json.NewDecoder(r.Body).Decode(&wT)
+	if err != nil {
+		http.Error(w, "Unable to decode request", http.StatusBadRequest)
+		return
+	}
+
+	wallet, err := wh.walletService.Transfer(ctx, wT.UserId, wT.FromAccount, wT.ToAccount, wT.Amount)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusAccepted)
+	json.NewEncoder(w).Encode(wallet)
+
 }

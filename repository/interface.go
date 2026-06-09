@@ -17,4 +17,5 @@ type UserRepository interface {
 type WalletRepository interface {
 	GetAllWallets(ctx context.Context) ([]model.Wallet, error)
 	GetWalletByUserId(ctx context.Context, id uuid.UUID) (model.User, model.Wallet, error)
+	Transfer(ctx context.Context, id uuid.UUID, fromAccount, toAccount string, amount float64) (model.Wallet, error)
 }
