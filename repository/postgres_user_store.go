@@ -87,12 +87,12 @@ func (s *PostgresStore) GetUserById(ctx context.Context, id uuid.UUID) (model.Us
 }
 
 func (s *PostgresStore) GetUserByEmail(ctx context.Context, email string) (model.User, bool, error) {
-	query := `SELECT id, first_name, last_name, email, created_at
+	query := `SELECT id, first_name, last_name, email, password_hash, created_at
 				FROM users WHERE email = $1`
 
 	var u model.User
 	fmt.Println("Finding the user")
-	err := s.db.QueryRow(ctx, query, email).Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.CreatedAt)
+	err := s.db.QueryRow(ctx, query, email).Scan(&u.ID, &u.FirstName, &u.LastName, &u.Email, &u.PasswordHash, &u.CreatedAt)
 	if err != nil {
 		fmt.Println("User not found")
 		return model.User{}, false, fmt.Errorf("An error occured finding that user: %w", err)

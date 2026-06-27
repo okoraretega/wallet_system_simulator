@@ -130,3 +130,37 @@ func (h *UserHandler) HandleUsers(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 	}
 }
+
+func (h *UserHandler) Login(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method Not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+	ctx := r.Context()
+
+	var u model.UserLogin
+
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if u.Email == "" || u.Password == "" {
+		http.Error(w, "Please provide email and password", http.StatusBadRequest)
+		return
+	}
+
+	if err != nil {
+		http.Error(w, "Failed to decode body", http.StatusBadRequest)
+		return
+	}
+
+	user, accessToken, err := h.userService.Login(ctx, u.Email, u.Password)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"access_token": accessToken,
+		"user":         user,
+	})
+}
