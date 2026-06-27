@@ -22,24 +22,37 @@ func NewUserHandler(s *services.UserService) *UserHandler {
 
 func (h *UserHandler) CreateUser(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
-	var u model.User
+	var u model.CreateUser
 	var wallet model.Wallet
 	err := json.NewDecoder(r.Body).Decode(&u)
+
+	if u.Email == "" || u.FirstName == "" || u.LastName == "" || u.Password == "" {
+		http.Error(w, "Please provide all required fields", http.StatusBadRequest)
+		return
+	}
 	if err != nil {
 		http.Error(w, "Invalid JSON", http.StatusBadRequest)
 		return
 	}
 
-	u, wallet, err = h.userService.CreateUser(ctx, u)
+	user, wallet, err := h.userService.CreateUser(ctx, u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusConflict)
 		return
 	}
 
+	userRes := model.UserResponse{
+		ID:        user.ID,
+		FirstName: user.FirstName,
+		LastName:  user.LastName,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	json.NewEncoder(w).Encode(map[string]any{
-		"user":   u,
+		"user":   userRes,
 		"wallet": wallet,
 	})
 }

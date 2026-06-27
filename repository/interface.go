@@ -12,6 +12,7 @@ type UserRepository interface {
 	DeleteUser(ctx context.Context, id uuid.UUID) (bool, error)
 	GetUserById(ctx context.Context, id uuid.UUID) (model.User, error)
 	GetAllUsers(ctx context.Context) ([]model.User, error)
+	GetUserByEmail(ctx context.Context, email string) (model.User, bool, error)
 }
 
 type WalletRepository interface {

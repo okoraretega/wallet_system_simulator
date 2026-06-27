@@ -64,3 +64,15 @@ func (s *UserStore) GetUserById(ctx context.Context, id uuid.UUID) (model.User, 
 
 	return model.User{}, errors.New("Unable to get user")
 }
+
+func (s *UserStore) GetUserByEmail(ctx context.Context, email string) (model.User, bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	for _, user := range s.users {
+		if user.Email == email {
+			return user, true, nil
+		}
+	}
+	return model.User{}, false, errors.New("Failed to find user")
+}

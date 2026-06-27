@@ -41,8 +41,8 @@ func main() {
 	walletService := services.NewWalletService(walletStore)
 	walletHandler := handlers.NewWalletHandler(walletService)
 
-	mux.HandleFunc("/wallets", walletHandler.GetAllWalets)
-	mux.HandleFunc("/wallets/", walletHandler.GetWalletByUserId)
+	mux.Handle("/wallets", TestMiddleWare(http.HandlerFunc(walletHandler.GetAllWalets)))
+	mux.Handle("/wallets/", TestMiddleWare(http.HandlerFunc(walletHandler.GetWalletByUserId)))
 	mux.HandleFunc("/wallets/transfer", walletHandler.Transfer)
 
 	// Users
@@ -59,4 +59,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Unable to start the server")
 	}
+}
+
+func TestMiddleWare(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		path := r.URL.Path
+		fmt.Printf("Hello from the %v\n", path)
+
+		next.ServeHTTP(w, r)
+	})
 }
